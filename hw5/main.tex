@@ -1,0 +1,153 @@
+\documentclass[parskip=half]{scrartcl}
+
+\usepackage[hidelinks]{hyperref}
+
+\renewcommand*{\thefootnote}{(\arabic{footnote})}
+
+\usepackage{microtype}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+
+\setmainfont{Georgia}
+\setsansfont{Helvetica Neue}
+\setmathfont{Stix Two Math}
+
+\KOMAoptions{DIV=calc}
+
+\begin{document}
+
+\input{../author}
+
+\begin{center}
+    \Large
+    \textsf{\textbf{Differential Privacy}}
+        
+    \vspace{0.4cm}
+    \large
+    Homework 5: Privacy Preserving Technologies
+        
+    \vspace{0.4cm}
+    \docauthor{}
+       
+    \vspace{0.9cm}
+\end{center}
+
+\tableofcontents
+
+\section{Differential privacy of query Q1}
+
+\subsection{Choosing the \texorpdfstring{$\epsilon$}{ε}}
+
+\begin{enumerate}
+    \item \textit{What is the global sensitivity of the query Q1?}
+    
+    For Q1, all votes for all candidates are counted, and the total of votes
+    for each candidate is returned. As such, any vote by a voter will increment
+    the total of votes for one candidate by one (assuming a single-vote
+    election), regardless of who they vote for.
+
+    We can thus say that for Q1, the difference of vote counts per candidate
+    for two adjacent tables is $1$, and hence the global sensitivity is
+    $\Delta q_1 = 1$.
+    
+    \item \textit{Which $\epsilon$ should be taken so that the probability of
+    getting the correct result is at least $0.9$?}
+
+    We wish that the probability of getting the correct election outcome be at
+    least $0.9$. This is only the case where all three vote totals are correct.
+    As such, each vote total must be correct with probability at least
+    $\sqrt[3]{0.9}$, assuming that the noise distribution is the same for all
+    three candidates. Conversely, this means that we do not get the correct
+    election outcome should we get a wrong vote total for any candidate, and
+    the probability of this happening, i.e., the probability of failure, must
+    be smaller than $\beta = 1-\sqrt[3]{0.9}$.
+
+    A difference of even one vote from the true vote count of a candidate can
+    change the outcome of the election. As such, we require that the noise
+    added to a result is less than one. Because we round noise to the nearest
+    integer value, we require noise to be below the accuracy to ensure it is
+    rounded down, i.e., $|\textit{noise}| < |\alpha| = 0.5$. This must hold
+    with probability of at least $\beta$\footnote{$\beta$ is an exclusive
+    upper bound for the error, as $1-\sqrt[3]{0.9}$ is included in the
+    probability of success.}.
+
+    We observe that since Q1 releases information about all three candidates,
+    but a voter can only vote for one candidate, the total vote counts for each
+    candidate are disjoint subsets with regards to the vote of a single voter.
+    We then decompose the query Q1 into three sub-queries consisting of the
+    vote count for each candidate. We hence have $Q1_f, Q1_w, Q1_b$, with
+    $Q1_f \cup Q1_w \cup Q1_b = Q1$, and $Q1_x \cap Q1_y = \varnothing$ for
+    $x, y\in, \{f, w, b\}$, and $x\neq y$.
+
+    If we consider the noise distribution to be the same for all three
+    candidates, we have that $Q1_f, Q1_w$ and $Q1_b$ provide equivalent
+    $\epsilon$-differential privacy, which is also the total privacy level of
+    Q1.
+
+    We have
+    $$
+        \alpha = \frac{\Delta q_1}{\epsilon}\ln{\frac{1}{\beta}}
+        \quad\Leftrightarrow\quad
+        -\frac{\alpha\epsilon}{\Delta q_1} = \ln{\beta}
+        \quad\Leftrightarrow\quad
+        \beta = e^{-\frac{\alpha\epsilon}{\Delta q_1}}.
+    $$
+    
+    Thus, if we want $\beta < 1 - \sqrt[3]{0.9}$ with $\Delta q_1 = 1$, we have
+    \begin{alignat*}{2}
+        \quad &&
+            1 - \sqrt[3]{0.9} &> e^{-\frac{\alpha\epsilon}{\Delta q_1}}\\
+        \Leftrightarrow\quad &&
+            \ln{\left(1 - \sqrt[3]{0.9}\right)} &> -\alpha\epsilon\\
+        \Leftrightarrow\quad &&
+            \epsilon &> -2 \ln{\left(1 - \sqrt[3]{0.9}\right)} \approx 6.733.
+    \end{alignat*}
+
+    To get the correct result with probability at least $0.9$, we must take
+    $\epsilon$ of at least $6.733$\footnote{$6.733$ is already large enough
+    because we rounded up.}.
+\end{enumerate}
+
+\subsection{Dealing with negative counts}
+
+\textit{Which of the following modifications would keep the system
+$\epsilon$-differentially private with the same value of $\epsilon$ due to the
+post-processing theorem? Why?}
+
+\begin{enumerate}
+    \item \textit{Sample only positive noise, i.e. from the interval
+    $[0, \infty)$.}
+
+    According to the post-processing theorem, processing is done on a
+    mechanism's output, and not the on the noise being sampled. That is, only
+    the data with the noise already added is processed. Hence this case does
+    not fall under the post-processing theorem, and we cannot assess this
+    modified system's $\epsilon$-differential privacy under the theorem.
+
+    \item \textit{If the true vote count of some candidate is some value $y$,
+    sample the noise from the interval $[-y, \infty)$.}
+
+    According to the post-processing theorem, processing is done on a
+    mechanism's output, and not the on the noise being sampled. That is, only
+    the data with the noise already added is processed. Hence this case does
+    not fall under the post-processing theorem, and we cannot assess this
+    modified system's $\epsilon$-differential privacy under the theorem.
+
+    \item \textit{If the noisy vote count of some candidate is negative, then
+    re-sample the noise until the result becomes positive.}
+    \item \textit{If the noisy vote count of some candidate is negative, then
+    round this negative count up to $0$.}
+\end{enumerate}
+
+\section{Differential privacy for query Q2}
+
+\subsection{Choosing the \texorpdfstring{$\epsilon$}{ε}}
+
+\begin{enumerate}
+    \item Which $\epsilon$ should be taken so that the probability of getting a
+    correct result should be at least $0.9$?
+
+
+\end{enumerate}
+
+\end{document}
