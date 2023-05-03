@@ -169,10 +169,261 @@ post-processing theorem? Why?}
 \subsection{Choosing the \texorpdfstring{$\epsilon$}{ε}}
 
 \begin{enumerate}
-    \item Which $\epsilon$ should be taken so that the probability of getting a
-    correct result should be at least $0.9$?
+    \item \textit{Which $\epsilon$ should be taken so that the probability of
+    getting a correct result should be at least $0.9$?}
 
+    For a score function, we estimate accuracy with
+    $$
+        \Pr[OPT - Q2(t, y^*) \ge \alpha] \le \beta,
+    $$
+    where $OPT=Q2(t, q_2(t))$ is the score of the optimal solution, and $y^*$ is
+    the output of the exponential mechanism.
+    
+    More particularly, for any $m$, we have
+    $$
+        \Pr[OPT - Q2(t, y^*) \ge
+        \frac{2\Delta q_2}{\epsilon}(\ln{(|Y|)} + m)] \le e^{-m},
+    $$
+    where $Y = \{Fox, Wolf, Bear\}$, and its cardinality is $|Y|=3$.
 
+    We see that $\beta = e^{-m}$ and that $\alpha =
+    \frac{2\Delta q_2}{\epsilon}(\ln{(|Y|)} + m)$. But we also have that
+    $\beta < 1 - 0.9$ since the probability of getting a correct result must be
+    $\ge 0.9$.
+
+    We can recover $m$ with
+    $$
+        \beta = e^{-m} \quad\Leftrightarrow\quad
+        \ln{\beta} = -m \quad\Leftrightarrow\quad
+        m = -\ln{\beta} = -\ln{(1 - 0.9)}=\ln{10}.
+    $$
+
+    Additionally, we want to achieve an accuracy $<1$, so that the
+    difference from the true count must be below one. This is because a
+    difference of one or more will alter the correct vote count, and may hence
+    change the election result. We then have an upper bound $\alpha=1$.
+
+    To calculate $\epsilon$ we must determine the global sensitivity of the
+    score function. Here also, the difference of vote counts per candidate
+    for two adjacent tables is $1$, and since the score function takes maximum
+    value of the sums of all votes for each candidate, the optimal score can
+    be affected by at most $1$. The global sensitivity is hence
+    $\Delta q_2 = 1$.
+
+    For $\alpha = 1$, $m=\ln{10}$, and $\Delta q_2=1$, we then have
+    \begin{alignat*}{2}
+        \quad&& \alpha &= \frac{2\Delta q_2}{\epsilon}(\ln(|Y|) + m)\\
+        \Leftrightarrow\quad&&
+        \epsilon &= \frac{2}{\alpha}(\ln(3) + \ln(10))\\
+        \Leftrightarrow\quad&&
+        \epsilon &= 2 \ln{30} \approx 6.802.
+    \end{alignat*}
+
+    To achieve a probability of at least $0.9$ of getting a correct result, we
+    must pick an $\epsilon$ of at least $6.802$.
+
+    \item \textit{How likely will the system output the actual winner for this
+    particular dataset?}
+
+    From the graph, we see that the wolf has the best score, i.e., the highest
+    vote count, with $67$ votes in total.
+
+    We have for $y = \textit{Wolf}$ that
+    \begin{align*}
+        \Pr[\textit{Exp}(t, Y, Q2, \epsilon) = y] &=
+        \frac{e^\frac{\epsilon Q2(t, y)}{2\Delta q_2}}
+        {\sum_{y'\in Y} e^\frac{\epsilon Q2(t, y')}{2\Delta q_2}}
+        =
+        \frac{e^{Q2(t, y) \cdot \ln{30}}}
+        {\sum_{y'\in Y} e^{Q2(t, y') \cdot \ln{30}}}\\
+        &=
+        \frac{e^{67\ln{30}}}
+        {
+            e^{67\ln{30}} +
+            e^{41\ln{30}} +
+            e^{25\ln{30}}
+        }\\
+        &\approx 0.999999999999999999999999999999999999996.
+    \end{align*}
+    \textit{\footnotesize(the computation can be viewed on
+    WolframAlpha\footnotemark{})}
+
+    We see that for $\epsilon\approx 6.802$, it is essentially certain that
+    the system will output the actual winner.
+
+    \footnotetext{\url{https://tinyurl.com/diffppt-212} (shortened for
+    display)}
+
+\end{enumerate}
+
+\subsection{The goodness of \texorpdfstring{$\epsilon$}{ε}}
+
+\begin{enumerate}
+    \item \textit{The initial motivation behind differential privacy was the
+    case of Fox coercing a group of 10 rabbits. Which $\epsilon$-DP is actually
+    guaranteed for the group of $10$ rabbits?}
+
+    To obtain $\epsilon$-DP for a group of size $k$, we can use any
+    $\frac{\epsilon}{k}$-DP mechanism. Currently, the $\epsilon$-DP applies to
+    $1$-adjacent tables, i.e., a group of size $1$. As such, we have that
+    $\epsilon = \frac{\epsilon'}{10}$, and for a group of $10$ rabbits, we
+    actually only have $10\epsilon$-DP, which is far weaker.
+
+    For a group of $10$ rabbits, an approximately $68$-DP is guaranteed, which
+    is a weak guarantee.
+
+    \item \textit{In the definition of $\epsilon$-DP, the inequality
+    $\Pr[\mathcal{M}_q(t) = y] \le e^\epsilon \cdot \Pr[\mathcal{M}_q(t') = y]$
+    holds for any neighbouring datasets $t$ and $t'$, and any noisy output $y$.
+    The query Q2 uses exponential mechanism with three possible outputs $y \in
+    \{Fox, Wolf, Bear\}$. Show that, for any choice of $t$ and $t'$, the
+    previously obtained $\epsilon$ does not give any privacy guarantees for at
+    least one output $y$.}
+
+    We have
+    \begin{alignat*}{2}
+        \quad&&
+        \Pr[\mathcal{M}_q(t) = y] &\le
+        e^\epsilon \cdot \Pr[\mathcal{M}_q(t') = y]\\
+        \Leftrightarrow\quad&&
+        \frac{\Pr[\mathcal{M}_q(t) = y]}
+        {\Pr[\mathcal{M}_q(t') = y]} &\le e^\epsilon,
+    \end{alignat*}
+    and for $\epsilon = 2\ln{30}$, and $\Delta q_2=1$ we have
+    \begin{alignat*}{2}
+        \quad&&
+        \Pr[\mathcal{M}_q(t) = y] &\le
+        e^\epsilon \cdot \Pr[\mathcal{M}_q(t') = y]\\
+        \Leftrightarrow\quad&&
+        \Pr[\mathcal{M}_q(t) = y] &\le
+        e^\epsilon \cdot
+        \frac{
+            e^{\frac{\epsilon Q2(t', y)}{2\Delta q_2}}
+        }{
+            \sum_{y'\in Y} e^{\frac{\epsilon Q2(t', y')}{2\Delta q_2}}
+        }\\
+        \Leftrightarrow\quad&&
+        \Pr[\mathcal{M}_q(t) = y] &\le
+        \frac{
+            e^{\epsilon + \frac{\epsilon Q2(t', y)}{2\Delta q_2}}
+        }{
+            \sum_{y'\in Y} e^{\frac{\epsilon Q2(t', y')}{2\Delta q_2}}
+        }\\
+        \Leftrightarrow\quad&&
+        \Pr[\mathcal{M}_q(t) = y] &\le
+        \frac{
+            e^{(2 + Q2(t', y)) \cdot \ln{30}}
+        }{
+            \sum_{y'\in Y} e^{Q2(t', y') \cdot \ln{30}}
+        }.
+    \end{alignat*}
+    
+    For $y=\textit{Wolf}$ with one vote removed, i.e., $Q2(t', y)=66$, we
+    hence have that
+    $$
+        \Pr[\mathcal{M}_q(t) = y] \le
+        \frac{
+            e^{(2 + 66) \cdot \ln{30}}
+        }{
+            e^{66\ln{30}} +
+            e^{41\ln{30}} +
+            e^{25\ln{30}}
+        } \approx 900.
+    $$
+
+    Because $\Pr[\mathcal{M}_q(t) = y] \le 1 < 900$ is always true and a
+    trivial bound, there is at least one output $y$ (we showed for the wolf),
+    where the previously obtained $\epsilon$ does not give any privacy
+    guarantees.
+
+    \item \textit{After looking at the numbers in the previous task, the
+    programmer decided that, for a reasonable privacy guarantee, we need to
+    take $10$ times smaller $\epsilon$. This will inevitably affect the
+    accuracy. Are there now reasonable guarantees for the probability that the
+    noisy result is correct?}
+
+    Let $\epsilon'=\frac{\epsilon}{10}$. We have for $y=\textit{Wolf}$ that
+    \begin{align*}
+        \Pr[\textit{Exp}(t, Y, Q2, \epsilon') = y]
+        &=
+        \frac{
+            e^\frac{\epsilon' Q2(t, y)}{2\Delta q_2}
+        }{
+            \sum_{y'\in Y}
+            e^\frac{\epsilon' Q2(t, y')}{2\Delta q_2}
+        }=
+        \frac{
+            e^{\frac{\ln{30}}{10} Q2(t, y)}
+        }{
+            \sum_{y'\in Y}
+            e^{\frac{\ln{30}}{10} Q2(t, y')}
+        }\\
+        &=
+        \frac{
+            e^{\frac{\ln{30}}{10} \cdot 67}
+        }{
+            e^{\frac{\ln{30}}{10} \cdot 67} +
+            e^{\frac{\ln{30}}{10} \cdot 41} +
+            e^{\frac{\ln{30}}{10} \cdot 25}
+        }\\
+        &\approx 0.99986.
+    \end{align*}
+
+    We see that while the accuracy is lessened, it is still accurate with high
+    probability ($\ge 0.9$), so there are still reasonable guarantees regarding
+    the correctness of the result.
+
+    \item \textit{In the definition of $\epsilon$-DP, the inequality
+    $\Pr[\mathcal{M}_q(t) = y] \le e^\epsilon \cdot \Pr[\mathcal{M}_q(t') = y]$
+    provides a guaranteed upper bound, while in practice
+    $\Pr[\mathcal{M}_q(t) = y]$ and $\Pr[\mathcal{M}_q(t') = y]$ can be even
+    closer to each other. How do you think, did the programmer overreact by
+    taking a smaller $\epsilon$?}
+
+    Here we have that the candidate results are fairly different from
+    each-other. That is, the first and second candidate have $26$ votes as a
+    difference. We need not concern ourself with the difference of second and
+    third place, since for Q2, only the winner matters. As such, reducing
+    $\epsilon$ was not an issue due to the large difference. Reducing
+    $\epsilon$ so drastically had the vote differences been small, e.g., only
+    one or two votes, then the programmer could have affected the outcome of
+    the election.
+
+    Therefore, whether the programmer overreacted depends on whether they knew
+    the magnitude differences between the counts. I do believe that reducing
+    $\epsilon$ so drastically was an overreaction if no previous thought was
+    put into this decision by the programmer, particularly considering the
+    stakes.
+\end{enumerate}
+
+\section{Decision}
+
+\textit{Would you prefer Q1 (using Laplace mechanism with rounding) or Q2
+(using exponential mechanism), and with which parameters, if you were}
+\begin{enumerate}
+    \item \textit{as an election organizer (interested in a fair election)?}
+    
+    As an election organiser, Q1 is very important. This is because the winning
+    party is not the only important aspect of an election. Fairness must apply
+    to all parties, and it may be that there was foul play regarding candidates
+    with less votes, which prevented them for getting as many votes as they
+    should have (e.g., anomaly of a system). As an organiser, I wish to get
+    accuracy for all candidates, not just the winner.
+
+    Therefore, Q1 with $6.7$-DP more or less guarantees a fair election, at
+    some privacy cost for voters. Still, guessing how a voter votes can be
+    profiled in so many ways, that the Q1 mechanism does not seem to add much
+    more privacy risks in an election context. Therefore, the weaker privacy is
+    acceptable to preserve the integrity and fairness of the election.
+
+    \item \textit{as a voter (interested in privacy)?}
+    
+    As a voter, I would prefer Q2, as it allows getting exceptional accuracy
+    (for the main result) for decent privacy. For example, with $\epsilon = 
+    \frac{2\ln{30}}{10} \approx 0.68$ we still get the correct election outcome
+    with probability $\ge 0.99$ (for the given values). The election would
+    remain fair, and there would be acceptable privacy for voters. We would
+    then also have $6.8$-DP for the group of $10$ rabbits, which is reasonable.
 \end{enumerate}
 
 \end{document}
