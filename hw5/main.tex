@@ -198,10 +198,10 @@ post-processing theorem? Why?}
         m = -\ln{\beta} = -\ln{(1 - 0.9)}=\ln{10}.
     $$
 
-    Additionally, we want to achieve an accuracy $<1$, so that the
-    difference from the true count must be below one. This is because a
-    difference of one or more will alter the correct vote count, and may hence
-    change the election result. We then have an upper bound $\alpha=1$.
+    Additionally, we want to achieve an accuracy $<1$, so that the difference
+    from the true count is below one. This is because a difference of one or
+    more will alter the correct vote count, and may hence change the election
+    outcome. We thus have an upper bound $\alpha=1$.
 
     To calculate $\epsilon$ we must determine the global sensitivity of the
     score function. Here also, the difference of vote counts per candidate
@@ -280,16 +280,7 @@ post-processing theorem? Why?}
     previously obtained $\epsilon$ does not give any privacy guarantees for at
     least one output $y$.}
 
-    We have
-    \begin{alignat*}{2}
-        \quad&&
-        \Pr[\mathcal{M}_q(t) = y] &\le
-        e^\epsilon \cdot \Pr[\mathcal{M}_q(t') = y]\\
-        \Leftrightarrow\quad&&
-        \frac{\Pr[\mathcal{M}_q(t) = y]}
-        {\Pr[\mathcal{M}_q(t') = y]} &\le e^\epsilon,
-    \end{alignat*}
-    and for $\epsilon = 2\ln{30}$, and $\Delta q_2=1$ we have
+    For $\epsilon = 2\ln{30}$, and $\Delta q_2=1$ we have
     \begin{alignat*}{2}
         \quad&&
         \Pr[\mathcal{M}_q(t) = y] &\le
