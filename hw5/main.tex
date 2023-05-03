@@ -63,13 +63,21 @@
     be smaller than $\beta = 1-\sqrt[3]{0.9}$.
 
     A difference of even one vote from the true vote count of a candidate can
-    change the outcome of the election. As such, we require that the noise
-    added to a result is less than one. Because we round noise to the nearest
-    integer value, we require noise to be below the accuracy to ensure it is
-    rounded down, i.e., $|\textit{noise}| < |\alpha| = 0.5$. This must hold
-    with probability of at least $\beta$\footnote{$\beta$ is an exclusive
-    upper bound for the error, as $1-\sqrt[3]{0.9}$ is included in the
-    probability of success.}.
+    change the outcome of the election. Because we round noise-added values to
+    the nearest integer value, and values themselves are already integers, we
+    require noise to be below $0.5$ to ensure the ``noised'' value is
+    rounded down. This avoids adding one vote to the summed candidate vote
+    count, and is essentially equivalent of applying no noise.
+    
+    More specifically, in the given case, rounding the noise to the nearest
+    integer before adding it to the vote count is equivalent to rounding the
+    result, and hence does not go against the post-processing theorem. We can
+    hence say that $|\textit{noise}| < |\alpha| = 0.5$ must hold with
+    probability of at least $\beta$\footnotemark{}, where $\alpha$ is the
+    accuracy.
+
+    \footnotetext{$\beta$ is an exclusive upper bound for the error, as
+    $1-\sqrt[3]{0.9}$ is included in the probability of success.}
 
     We observe that since Q1 releases information about all three candidates,
     but a voter can only vote for one candidate, the total vote counts for each
@@ -82,7 +90,7 @@
     If we consider the noise distribution to be the same for all three
     candidates, we have that $Q1_f, Q1_w$ and $Q1_b$ provide equivalent
     $\epsilon$-differential privacy, which is also the total privacy level of
-    Q1.
+    Q1 due to parallel composition.
 
     We have
     $$
@@ -118,25 +126,42 @@ post-processing theorem? Why?}
     \item \textit{Sample only positive noise, i.e. from the interval
     $[0, \infty)$.}
 
-    According to the post-processing theorem, processing is done on a
-    mechanism's output, and not the on the noise being sampled. That is, only
-    the data with the noise already added is processed. Hence this case does
-    not fall under the post-processing theorem, and we cannot assess this
-    modified system's $\epsilon$-differential privacy under the theorem.
+    According to the post-processing theorem, processing must not depend on the
+    noise and/or private data added by the mechanism. Thus, this case does not
+    fall under the post-processing theorem, and the modified system may no
+    longer be $\epsilon$-differentially private, as it may leak information
+    about the underlying data. More specifically, we have altered the noise
+    distribution and introduced value bias.
 
     \item \textit{If the true vote count of some candidate is some value $y$,
     sample the noise from the interval $[-y, \infty)$.}
 
-    According to the post-processing theorem, processing is done on a
-    mechanism's output, and not the on the noise being sampled. That is, only
-    the data with the noise already added is processed. Hence this case does
-    not fall under the post-processing theorem, and we cannot assess this
-    modified system's $\epsilon$-differential privacy under the theorem.
+    The vote count of some candidate is private data, i.e., data we seek to
+    protect. The post-processing theorem states that processing must not depend
+    on private data. Hence, this system may no longer be
+    $\epsilon$-differentially private, as it may leak information about the
+    underlying data. More specifically, we have altered the noise distribution
+    and introduced value bias.
 
     \item \textit{If the noisy vote count of some candidate is negative, then
     re-sample the noise until the result becomes positive.}
+    
+    The approach may reveal timing information exploitable by side-channel
+    attacks for an active adversary. We have also altered the noise
+    distribution, as our result is equivalent to once more applying noise only
+    from the $[-y, \infty)$ interval. The system is therefore
+    not $\epsilon$-differentially private.
+
+    We note that we understand this modification to re-add the noise to the
+    original value. The situation would be different if noise was added to
+    already noised output.
+
     \item \textit{If the noisy vote count of some candidate is negative, then
     round this negative count up to $0$.}
+
+    This modification keeps the system $\epsilon$-differentially private. This
+    processing is deterministic, and can be done with anyone having access to
+    the $\epsilon$-differentially private output of the initial mechanism.
 \end{enumerate}
 
 \section{Differential privacy for query Q2}
