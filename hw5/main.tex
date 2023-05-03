@@ -57,54 +57,60 @@
     least $0.9$. This is only the case where all three vote totals are correct.
     As such, each vote total must be correct with probability at least
     $\sqrt[3]{0.9}$, assuming that the noise distribution is the same for all
-    three candidates. Conversely, this means that we do not get the correct
-    election outcome should we get a wrong vote total for any candidate, and
-    the probability of this happening, i.e., the probability of failure, must
-    be smaller than $\beta = 1-\sqrt[3]{0.9}$.
+    three candidates.
 
     A difference of even one vote from the true vote count of a candidate can
-    change the outcome of the election. Because we round noise-added values to
-    the nearest integer value, and values themselves are already integers, we
-    require noise to be below $0.5$ to ensure the ``noised'' value is
-    rounded down. This avoids adding one vote to the summed candidate vote
-    count, and is essentially equivalent of applying no noise.
-    
-    More specifically, in the given case, rounding the noise to the nearest
-    integer before adding it to the vote count is equivalent to rounding the
-    result, and hence does not go against the post-processing theorem. We can
-    hence say that $|\textit{noise}| < |\alpha| = 0.5$ must hold with
-    probability of at least $\beta$\footnotemark{}, where $\alpha$ is the
-    accuracy.
+    change the outcome of the election. Because we apply a Laplace mechanism
+    with rounding, we require that the noised value is rounded towards the
+    original value. Since results are already integers, it is enough to round
+    already the noise, as in this specific case, the $\epsilon$-DP still holds
+    under the post-processing theorem. More specifically, the true results are
+    kept if noise is rounded towards $0$.
+
+    We therefore seek to find an $\epsilon$ such that $\textit{rLap}\left(0,
+    \frac{\Delta q_1}{\epsilon}\right) = 0$. Because values are rounded towards
+    $0$ if they are less than $0.5$, and towards $1$ if they are at least
+    $0.5$, we have that
+    \begin{align*}
+        \Pr[\textit{noise}_\textit{rLap} = 0]
+        &= \Pr[|\textit{noise}_\textit{Lap}| < 0.5]\\
+        &= 1 - \Pr[|\textit{noise}_\textit{Lap}| \ge 0.5].
+    \end{align*}
+
+    For the given case, we want $\textit{noise}_\textit{rLap} = 0$ with a
+    probability of at least $\sqrt[3]{0.9}$, and so we have
+    \begin{alignat*}{2}
+        \quad &&
+        \Pr[\textit{noise}_\textit{rLap} = 0] &\ge \sqrt[3]{0.9}\\
+        \Leftrightarrow\quad &&
+        1 - \Pr[|\textit{noise}_\textit{Lap}| \ge 0.5] &\ge \sqrt[3]{0.9}\\
+        \Leftrightarrow\quad &&
+        \Pr[|\textit{noise}_\textit{Lap}| \ge 0.5] &\le 1 - \sqrt[3]{0.9}.
+    \end{alignat*}
+
+    For accuracy $\alpha$ and probability of failure $\beta$, we know that
+    $$
+        \Pr[|\textit{noise}_\textit{Lap}| \ge \alpha] \le \beta,
+    $$
+    and therefore we have $\alpha = 0.5$ and the upper bound
+    $1 - \sqrt[3]{0.9}$ for $\beta$\footnotemark{}.
 
     \footnotetext{$\beta$ is an exclusive upper bound for the error, as
     $1-\sqrt[3]{0.9}$ is included in the probability of success.}
 
-    We observe that since Q1 releases information about all three candidates,
-    but a voter can only vote for one candidate, the total vote counts for each
-    candidate are disjoint subsets with regards to the vote of a single voter.
-    We then decompose the query Q1 into three sub-queries consisting of the
-    vote count for each candidate. We hence have $Q1_f, Q1_w, Q1_b$, with
-    $Q1_f \cup Q1_w \cup Q1_b = Q1$, and $Q1_x \cap Q1_y = \varnothing$ for
-    $x, y\in, \{f, w, b\}$, and $x\neq y$.
-
-    If we consider the noise distribution to be the same for all three
-    candidates, we have that $Q1_f, Q1_w$ and $Q1_b$ provide equivalent
-    $\epsilon$-differential privacy, which is also the total privacy level of
-    Q1 due to parallel composition.
-
-    We have
+    We have from theory that
     $$
         \alpha = \frac{\Delta q_1}{\epsilon}\ln{\frac{1}{\beta}}
         \quad\Leftrightarrow\quad
         -\frac{\alpha\epsilon}{\Delta q_1} = \ln{\beta}
         \quad\Leftrightarrow\quad
-        \beta = e^{-\frac{\alpha\epsilon}{\Delta q_1}}.
+        \beta = e^{-\frac{\alpha\epsilon}{\Delta q_1}},
     $$
-    
-    Thus, if we want $\beta < 1 - \sqrt[3]{0.9}$ with $\Delta q_1 = 1$, and
-    $\alpha < 0.5$, we have
+    and so, for $\alpha = 0.5, \Delta q_1 = 1$, we have 
     \begin{alignat*}{2}
         \quad &&
+            1 - \sqrt[3]{0.9} &> \beta\\
+        \Leftrightarrow\quad &&
             1 - \sqrt[3]{0.9} &> e^{-\frac{\alpha\epsilon}{\Delta q_1}}\\
         \Leftrightarrow\quad &&
             \ln{\left(1 - \sqrt[3]{0.9}\right)} &> -\alpha\epsilon\\
@@ -112,7 +118,25 @@
             \epsilon &> -2 \ln{\left(1 - \sqrt[3]{0.9}\right)} \approx 6.733.
     \end{alignat*}
 
-    To get the correct result with probability at least $0.9$, we must take
+    This $\epsilon$ value only holds true for the result of a single candidate.
+    
+    We observe that since Q1 releases information about all three candidates,
+    but a voter can only vote for one candidate, the total vote counts for each
+    candidate are disjoint subsets with regards to the vote of a single voter.
+    We can then decompose the query Q1 into three disjoint sub-queries
+    $Q1_F, Q1_W, Q1_B$, consisting of the vote count for each candidate,
+    respectively. We hence have $Q1_F \cup Q1_W \cup Q1_B = Q1$, and
+    $Q1_x \cap Q1_y = \varnothing$ for $x, y\in \{F, W, B\}$, with $x\neq y$.
+
+    Since we consider the noise distribution to be the same for all three
+    sub-queries, we have that $Q1_F, Q1_W$ and $Q1_B$ all provide equivalent
+    $\epsilon$-differential privacy, with $\epsilon_{\textit{Q1F}} =
+    \epsilon_\textit{Q1W} = \epsilon_\textit{Q1B} = \epsilon_{\textit{Q1}}
+    \approx 6.733$. Due to parallel composition, the sequence of these
+    queries---which is equivalent to Q1---has also
+    $\epsilon_{\textit{Q1}}$-differential privacy.
+
+    To get the correct result with probability at least $0.9$, we must take an
     $\epsilon$ of at least $6.733$\footnote{$6.733$ is already large enough
     because we rounded up.}.
 \end{enumerate}
