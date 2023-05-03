@@ -128,30 +128,31 @@ post-processing theorem? Why?}
     $[0, \infty)$.}
 
     According to the post-processing theorem, processing must not depend on the
-    noise and/or private data added by the mechanism. Thus, this case does not
-    fall under the post-processing theorem, and the modified system may no
-    longer be $\epsilon$-differentially private, as it may leak information
-    about the underlying data. More specifically, we have altered the noise
-    distribution and introduced value bias.
+    noise and/or private data added by the mechanism. Here, processing changes
+    the noise distribution, and therefore introduces bias. The processing is no
+    longer independent of the output generation, and the system may no longer
+    be $\epsilon$-differentially private under the theorem.
 
     \item \textit{If the true vote count of some candidate is some value $y$,
     sample the noise from the interval $[-y, \infty)$.}
 
-    The vote count of some candidate is private data, i.e., data we seek to
-    protect. The post-processing theorem states that processing must not depend
-    on private data. Hence, this system may no longer be
-    $\epsilon$-differentially private, as it may leak information about the
-    underlying data. More specifically, we have altered the noise distribution
-    and introduced value bias.
+    The post-processing theorem states that processing must not depend
+    on private data. Here, the noise distribution depends on some private data,
+    i.e., the true candidate vote count, and therefore bias may be introduced,
+    as noise distribution is not only changed, but is also conditional. Hence,
+    this system may no longer be $\epsilon$-differentially private under the
+    theorem.
 
     \item \textit{If the noisy vote count of some candidate is negative, then
     re-sample the noise until the result becomes positive.}
     
     The approach may reveal timing information exploitable by side-channel
-    attacks for an active adversary. We have also altered the noise
-    distribution, as our result is equivalent to once more applying noise only
-    from the $[-y, \infty)$ interval. The system is therefore
-    not $\epsilon$-differentially private.
+    attacks for an active adversary. We have also altered the applied noise
+    with rejection sampling. More specifically, while the noise distribution
+    itself is not altered, i.e. not restricted to $[-y, \infty)$, only noise
+    from within this interval gets applied, introducing bias in the results.
+    The system is therefore not $\epsilon$-differentially private under the
+    theorem.
 
     We note that we understand this modification to re-add the noise to the
     original value. The situation would be different if noise was added to
@@ -162,8 +163,13 @@ post-processing theorem? Why?}
 
     This modification keeps the system $\epsilon$-differentially private. This
     processing is deterministic, and can be done with anyone having access to
-    the $\epsilon$-differentially private output of the initial mechanism.
+    the $\epsilon$-differentially private output of the initial mechanism. This
+    case hence falls under the post-processing theorem.
 \end{enumerate}
+
+We conclude that only the $4^\text{th}$ approach keeps the system
+$\epsilon$-differentially private due to the post-processing theorem, for the
+same $\epsilon$.
 
 \section{Differential privacy for query Q2}
 
