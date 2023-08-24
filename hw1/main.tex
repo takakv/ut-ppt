@@ -1,0 +1,140 @@
+\documentclass[parskip=half]{scrartcl}
+
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{tgheros}
+
+\usepackage{microtype}
+\usepackage{fontspec}
+
+\usepackage[
+    backend=biber,
+    style=ieee,
+]{biblatex}
+\addbibresource{ref.bib}
+
+\setmainfont{Georgia}
+\setsansfont{Helvetica Neue}
+
+\KOMAoptions{DIV=calc}
+
+\begin{document}
+
+\input{../author}
+
+\begin{center}
+    \Large
+    \textsf{\textbf{Vastaamo  Mental Health Platform}}
+        
+    \vspace{0.4cm}
+    \large
+    Homework 1: Privacy Preserving Technologies
+        
+    \vspace{0.4cm}
+    \docauthor{}
+       
+    \vspace{0.9cm}
+\end{center}
+
+\subsubsection*{Description of the system}
+
+% Description of the system - what does/would it do? (Up to 1 paragraph)
+
+Vastaamo provided private online mental-health services to patients. Patients
+were offered online counselling, but in-person therapy sessions were also
+available. Therapists would write and upload therapy notes of patient sessions
+in the company's browser-based note system. Scheduling and invoicing would also
+happen through the online platform \cite{wired1}.
+
+\subsubsection*{Stakeholders}
+
+% Stakeholders who would be touching the data in some way. Please distinguish
+% data owners, the service provider and result users. For each stakeholder,
+% state their role in the system. (Up to 3 short paragraphs)
+
+\begin{itemize}
+    \item The patient: patients are the data subject. It is data about them that
+    is stored by Vastaamo. They give this data during therapy sessions.
+    \item The therapist: therapists are the data owners. They input the personal
+    data (i.e., the therapy notes) into the system, and it is in their interest
+    that it is correct. Therapists are also the result users, since they use the
+    data that they input.
+    \item Vastaamo: Vastaamo is the service provider. They provide the web
+    interface and databases. In a sense, Vastaamo is a joint data owner with the
+    therapists.
+\end{itemize}
+
+It is unclear whether the patient can directly manage details such as their
+contact details, or if these are also input into the system by the therapist.
+While the patients do benefit (hopefully) from Vastaamo, they do not get to
+access the therapy notes.
+
+\subsubsection*{Explicit properties}
+
+% Explicit properties. Describe the communicated functionality of the system,
+% expected impact, used technology, operating concepts and if any privacy
+% control measures have been used. (Up to 3-4 paragraphs of reasonable length)
+
+Vastaamo designed its bespoke system for patient data management. Therapists
+would use a web-interface to write their notes during patient sessions. This
+would allow them to have all notes for all patients in a single place, for easy
+search and review \cite{wired1}.
+
+While not all technical details are explicit and known, data suggests that
+records were stored on a MySQL system without anonymisation or encryption
+\cite{wired1}. The database contained the contact details, national
+identification numbers and the therapy notes of patients \cite{berggren}. Not
+only was the note-taking portal remotely accessible, but the database servers
+themselves were also open to the world. Moreover, the database root account was
+not password protected \cite{ombudsman}.
+
+The system was not connected to the national health data repository ``Kanta'',
+so security and privacy practices where laxly regulated. Vastaamo only had to
+self-certify that their system met government regulations \cite{wired1}.
+
+\textit{Note: I assume that when sources mention a lack of anonymisation, they
+mean also a lack of pseudonymisation, as it would sound impractical for
+therapists to recall and search through anonymised patient notes.}
+
+\subsubsection*{Emergent properties}
+
+% Emergent/implicit properties. Analyse the system from the point of impact to
+% the personal/confidential data. What kind of leakages are possible? How could
+% these leakages be used? What could the impact to data owners/subjects be? You
+% may refer to sources you've read here, but my expectations is that you are
+% capable of providing additional analysis of your own (Up to 3-4 paragraphs of
+% reasonable length)
+
+Because of the highly sensitive nature of the personal data collected by
+Vastaamo, any leakage could have (and had) disastrous consequences for
+the patients involved. The ``least damaging'' leak would concern only
+administrative patient records, such as their contact information and national
+identification numbers. For leaked therapy notes, the impact is far worse.
+
+In case of a non-public leak, this data could be used for patient extortion,
+(e.g., money, favours). As data ended up being leaked publicly, patients became
+vulnerable to discrimination from both regular citizens but for example also by
+employers. Even more, if leaked records contain illegal practices of a patient,
+e.g., substance abuse, it could leave patients open for criminal investigations.
+It is easy to see how such a leak could destroy lives of people affected.
+
+It is worth noting, that even if records were leaked without associated patient
+data (e.g., name), then due to the deeply personal nature of the data, someone
+could potentially process the leaked data and tie it back to a person they know.
+For example, it is reasonable to assume that some patients would mention the
+names of their friends and family, and the name of their school or workplace.
+
+As therapy is based on patient-therapist trust, and this trust should extend to
+the service provider, then a leak of all patient records is a business-ending
+event. Not only will clients no longer turn towards the business, but the legal
+fees involved with such a data breach can be astronomical. On top of causing
+bankruptcy for the company, management and/or employees could face severe
+charges against their person, such as for malpractice or gross negligence.
+
+% References: source material that you have used, preferably public materials I
+% could review and compare to your work (see above for the use of confidential
+% source materials).
+
+\printbibliography
+
+\end{document}

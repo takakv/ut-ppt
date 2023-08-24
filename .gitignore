@@ -1,5 +1,8 @@
 .DS_Store
 
+## Privacy
+author.tex
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
